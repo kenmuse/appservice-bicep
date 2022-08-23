@@ -2,7 +2,7 @@
 name: Deploy App
 
 env:
-  AZURE_WEBAPP_NAME: tmpdevapp2
+  AZURE_WEBAPP_NAME: tmpdevweb
   AZURE_RESOURCE_GROUP: tmpdevapp-rg
   AZURE_LOCATION: eastus
 
@@ -47,7 +47,7 @@ jobs:
         subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         resourceGroupName: ${{ env.AZURE_RESOURCE_GROUP }}
         template: ./env/main.bicep
-        parameters: 'webAppName=${{ env.AZURE_WEBAPP_NAME }} isLinuxDeploy=true sku=B1'
+        parameters: 'webAppName=${{ env.AZURE_WEBAPP_NAME }} isLinuxDeploy=false sku=B1'
         failOnStdErr: true
 
   build:

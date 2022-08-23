@@ -52,10 +52,21 @@ resource appService 'Microsoft.Web/sites@2022-03-01' = {
   }
   properties: {
     serverFarmId: appServicePlan.id
+    clientAffinityEnabled: false
     httpsOnly: true
-    siteConfig: union(linuxSiteConfig, {
+  }
+
+  resource config 'config' = {
+    name: 'web'
+    properties: union(linuxSiteConfig,{
       minTlsVersion: '1.2'
       scmMinTlsVersion: '1.2'
+      http20Enabled: true
+      httpLoggingEnabled: false
+      detailedErrorLoggingEnabled: false
+      use32BitWorkerProcess: false
+      webSocketsEnabled: true
+      alwaysOn: true
       ftpsState: 'Disabled'
     })
   }
