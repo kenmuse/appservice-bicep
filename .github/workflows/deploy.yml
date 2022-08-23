@@ -52,7 +52,7 @@ jobs:
     - name: Deploy services (AZ CLI)
       id: deploy2
       run: |
-        RESULTS=$(az deployment group --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query properties.outputs --template-file ./env/main.bicep --parameters webAppName=${{ env.AZURE_WEBAPP_NAME }} isLinuxDeploy=false sku=B1)
+        RESULTS=$(az deployment group --resource-group "${{ env.AZURE_RESOURCE_GROUP }}" --query "properties.outputs" --template-file "./env/main.bicep" --parameters webAppName='${{ env.AZURE_WEBAPP_NAME }}' isLinuxDeploy=false sku=B1)
         echo $RESULTS
         APPSERVICENAME="$(echo $RESULTS | jq -r '.appServiceName.value' )"
         APPSERVICEHOST="$(echo $RESULTS | jq -r '.appServiceHost.value' )"
