@@ -1,0 +1,109 @@
+name: Deploy App
+
+env:
+  AZURE_WEBAPP_NAME: tmpdevapp
+  AZURE_RESOURCE_GROUP: tmpdevapp-rg
+  AZURE_LOCATION: eastus
+  DOTNET_VERSION: '6.x'               # set this to the .NET Core version to use
+
+on:
+  push:
+    branches:
+      - "main"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-services:
+    runs-on: ubuntu-latest
+    environment: Development
+    permissions:
+      id-token: write
+      
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Authenticate with Azure
+      uses: azure/login@v1
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      
+    - name: "Create group: ${{ env.AZURE_RESOURCE_GROUP }}"
+      if: false
+      run: |
+        if [ $(az group exists --name ${{ env.AZURE_RESOURCE_GROUP }}) = false ]; then
+          az group create --name $${{ env.AZURE_RESOURCE_GROUP }} --location ${{ env.AZURE_LOCATION }}
+        fi
+        
+    - name: Deploy services
+      uses: azure/arm-deploy@v1
+      with:
+        subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        resourceGroupName: ${{ secrets.AZURE_RESOURCE_GROUP }}
+        template: ./env/main.bicep
+        parameters: 'webAppName=${{ env.AZURE_WEBAPP_NAME }} isLinuxDeploy=false sku=B1'
+        failOnStdErr: true
+
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+      
+      - name: Set up dependency caching for faster builds
+        uses: actions/cache@v3
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Build and package 
+        run: dotnet build --configuration Release /t:Package /p:PackageFolder=${{ runner.temp }}/pkg
+        working-directory: ${{ github.workspace }}/src
+
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v3
+        with:
+          name: package
+          path: ${{ runner.temp }}/pkg/publish.zip
+
+  deploy:
+    permissions:
+      contents: none
+      id-token: write
+    runs-on: ubuntu-latest
+    needs: [build, deploy-services]
+    environment:
+      name: 'Development'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v3
+        with:
+          name: package
+          path: ${{ runner.temp }}/package
+          
+      - name: Authenticate with Azure
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          package: ${{ runner.temp }}/package/publish.zip
