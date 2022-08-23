@@ -4,7 +4,6 @@ env:
   AZURE_WEBAPP_NAME: tmpdevapp
   AZURE_RESOURCE_GROUP: tmpdevapp-rg
   AZURE_LOCATION: eastus
-  DOTNET_VERSION: '6.x'               # set this to the .NET Core version to use
 
 on:
   push:
@@ -12,16 +11,13 @@ on:
       - "main"
   workflow_dispatch:
 
-permissions:
-  contents: read
-
 jobs:
   deploy-services:
     runs-on: ubuntu-latest
     environment: Development
     permissions:
       id-token: write
-      
+      contents: read
     steps:
     - uses: actions/checkout@v3
     
@@ -50,14 +46,14 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: read
+      
     steps:
       - uses: actions/checkout@v3
 
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v2
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
       
       - name: Set up dependency caching for faster builds
         uses: actions/cache@v3
