@@ -32,14 +32,14 @@ jobs:
       if: false
       run: |
         if [ $(az group exists --name ${{ env.AZURE_RESOURCE_GROUP }}) = false ]; then
-          az group create --name $${{ env.AZURE_RESOURCE_GROUP }} --location ${{ env.AZURE_LOCATION }}
+          az group create --name ${{ env.AZURE_RESOURCE_GROUP }} --location ${{ env.AZURE_LOCATION }}
         fi
         
     - name: Deploy services
       uses: azure/arm-deploy@v1
       with:
         subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-        resourceGroupName: ${{ secrets.AZURE_RESOURCE_GROUP }}
+        resourceGroupName: ${{ env.AZURE_RESOURCE_GROUP }}
         template: ./env/main.bicep
         parameters: 'webAppName=${{ env.AZURE_WEBAPP_NAME }} isLinuxDeploy=false sku=B1'
         failOnStdErr: true
