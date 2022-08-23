@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>aspnet-AppServiceDemo-d87f5911-dbd1-4670-8d6a-62f99b4737e5</UserSecretsId>
+    <!-- 
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <PublishTrimmed>true</PublishTrimmed>
+    <RuntimeIdentifier>linux-amd64</RuntimeIdentifier>
+    -->
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(RunConfiguration)' == 'https' " />
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.8" NoWarn="NU1605" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="6.0.8" NoWarn="NU1605" />
+    <PackageReference Include="Microsoft.Identity.Web" Version="1.25.1" />
+    <PackageReference Include="Microsoft.Identity.Web.UI" Version="1.25.1" />
+  </ItemGroup>
+
+  <PropertyGroup>
+      <PackageFolder Condition="'$(PackageFolder)' == ''">$(MSBuildProjectDirectory)/$(PublishUrl)/..</PackageFolder>
+      <PackageOutputPath Condition="'$(PackageOutputPath)' == ''">$(PackageFolder)/publish.zip</PackageOutputPath>
+  </PropertyGroup>
+  <Target Name="Package" DependsOnTargets="Publish">
+      <MakeDir Directories="$(PackageFolder)" />
+      <ZipDirectory Overwrite="true" SourceDirectory="$(MSBuildProjectDirectory)/$(PublishUrl)" DestinationFile="$(PackageOutputPath)" />
+  </Target>
+  <Target Name="PackageClean" AfterTargets="Clean">
+      <Message Text="Cleaning!!" Importance="Normal" />
+      <Delete Files="$(PackageOutputPath)" />
+  </Target>
+</Project>
