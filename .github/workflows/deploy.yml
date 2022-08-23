@@ -15,14 +15,12 @@ on:
 jobs:
   deploy-services:
     runs-on: ubuntu-latest
-    environment: 
-      name: Development
-      url: 'https://${{ steps.deploy.outputs.appServiceHost }}'
+    environment: Development
     permissions:
       id-token: write
       contents: read
     outputs:
-      appServiceName: ${{ steps.deploy.outputs.appServiceName }}
+      appServiceName: ${{ steps.deploy2.outputs.appServiceName }}
     steps:
     - uses: actions/checkout@v3
     
@@ -42,6 +40,7 @@ jobs:
         
     - name: Deploy services
       id: deploy
+      if: false
       uses: azure/arm-deploy@v1
       with:
         subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
@@ -49,6 +48,17 @@ jobs:
         template: ./env/main.bicep
         parameters: 'webAppName=${{ env.AZURE_WEBAPP_NAME }} isLinuxDeploy=false sku=B1'
         failOnStdErr: true
+
+    - name: Deploy services (AZ CLI)
+      id: deploy2
+      run: |
+        RESULTS=$(az deployment group --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query properties.outputs --template-file ./env/main.bicep --parameters webAppName=${{ env.AZURE_WEBAPP_NAME }} isLinuxDeploy=false sku=B1)
+        echo $RESULTS
+        APPSERVICENAME="$(echo $RESULTS | jq -r '.appServiceName.value' )"
+        APPSERVICEHOST="$(echo $RESULTS | jq -r '.appServiceHost.value' )"
+        echo "::set-output name=appServiceName::$APPSERVICENAME"
+        echo "::set-output name=appServiceHost::$APPSERVICEHOST"
+
 
   build:
     runs-on: ubuntu-latest
@@ -89,7 +99,8 @@ jobs:
     needs: [build, deploy-services]
     environment:
       name: 'Development'
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+      url: 'https://${{ needs.deploy-services.outputs.appServiceName }}.azurewebsites.net'
+      # ${{ steps.deploy-to-webapp2.outputs.webapp-url }}
 
     steps:
       - name: Download artifact from build job
@@ -106,8 +117,15 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Deploy to Azure Web App
+        if: false
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ needs.deploy-services.outputs.appServiceName }}
           package: ${{ runner.temp }}/package/publish.zip
+
+      - name: Deploy to Azure Web App (AZCLI)
+        id: deploy-to-webapp2
+        run: |
+          RESULTS=$(az webapp deployment source config-zip --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --name ${{ needs.deploy-services.outputs.appServiceName }} --src ${{ runner.temp }}/package/publish.zip)
+          echo "::set-output name=webapp-url::"
