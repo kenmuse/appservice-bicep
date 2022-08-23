@@ -22,8 +22,8 @@ param sku string = 'B1' // The SKU of App Service Plan
 @description('Resource group location')
 param location string = resourceGroup().location // Location for all resources
 
-@description('Deploy to Linux or Windows)
-param isLinuxDeploy boolean = false
+@description('Deploy to Linux or Windows')
+param isLinuxDeploy bool = false
 
 var appServicePlanName = toLower('${webAppName}-plan')
 var webSiteName = toLower('${webAppName}-web')
@@ -46,12 +46,12 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2021-03-01' = {
 resource appService 'Microsoft.Web/sites@2021-03-01' = {
   name: webSiteName
   location: location
-  kind: app
+  kind: 'app'
   identity: {
     type: 'SystemAssigned'
   }
   properties: {
-    serverFarmId: appServicePlan.id,
+    serverFarmId: appServicePlan.id
     httpsOnly: true
     siteConfig: union(linuxSiteConfig, {
       minTlsVersion: '1.2'

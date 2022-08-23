@@ -1,3 +1,4 @@
+#yaml-language-server: $schema=https://json.schemastore.org/github-workflow
 name: Deploy App
 
 env:
@@ -72,6 +73,8 @@ jobs:
         with:
           name: package
           path: ${{ runner.temp }}/pkg/publish.zip
+          retention-days: 1
+          if-no-files-found: error
 
   deploy:
     permissions:

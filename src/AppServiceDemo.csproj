@@ -30,7 +30,6 @@
       <ZipDirectory Overwrite="true" SourceDirectory="$(MSBuildProjectDirectory)/$(PublishUrl)" DestinationFile="$(PackageOutputPath)" />
   </Target>
   <Target Name="PackageClean" AfterTargets="Clean">
-      <Message Text="Cleaning!!" Importance="Normal" />
       <Delete Files="$(PackageOutputPath)" />
   </Target>
 </Project>
