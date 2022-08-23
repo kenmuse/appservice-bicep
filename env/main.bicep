@@ -68,3 +68,6 @@ resource appSettings 'Microsoft.Web/sites/config@2022-03-01' = {
     WEBSITE_RUN_FROM_PACKAGE: '1'
   }
 }
+
+output appServiceName string = appService.name
+output appServiceHost string = appService.properties.defaultHostName
