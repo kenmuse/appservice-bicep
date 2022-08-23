@@ -17,10 +17,10 @@ param webAppName string = uniqueString(resourceGroup().id)
   'P3'
   'P4'
 ])
-param sku string = 'B1' // The SKU of App Service Plan
+param sku string = 'B1'
 
 @description('Resource group location')
-param location string = resourceGroup().location // Location for all resources
+param location string = resourceGroup().location
 
 @description('Deploy to Linux or Windows')
 param isLinuxDeploy bool = false
@@ -31,7 +31,7 @@ var linuxSiteConfig = isLinuxDeploy ? {
     linuxFxVersion: 'DOTNETCORE|6.0'
 } : { }
 
-resource appServicePlan 'Microsoft.Web/serverfarms@2021-03-01' = {
+resource appServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = {
   name: appServicePlanName
   location: location
   properties: {
@@ -40,10 +40,10 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2021-03-01' = {
   sku: {
     name: sku
   }
-  kind:  isLinuxDeploy ? 'linux' : null
+  kind:  isLinuxDeploy ? 'linux' : ''
 }
 
-resource appService 'Microsoft.Web/sites@2021-03-01' = {
+resource appService 'Microsoft.Web/sites@2022-03-01' = {
   name: webSiteName
   location: location
   kind: 'app'
@@ -58,5 +58,13 @@ resource appService 'Microsoft.Web/sites@2021-03-01' = {
       scmMinTlsVersion: '1.2'
       ftpsState: 'Disabled'
     })
+  }
+}
+
+resource appSettings 'Microsoft.Web/sites/config@2022-03-01' = {
+  name: 'appsettings'
+  parent: appService
+  properties: {
+    WEBSITE_RUN_FROM_PACKAGE: '1'
   }
 }
