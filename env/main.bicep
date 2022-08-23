@@ -54,11 +54,7 @@ resource appService 'Microsoft.Web/sites@2022-03-01' = {
     serverFarmId: appServicePlan.id
     clientAffinityEnabled: false
     httpsOnly: true
-  }
-
-  resource config 'config' = {
-    name: 'web'
-    properties: union(linuxSiteConfig,{
+    siteConfig: union(linuxSiteConfig,{
       minTlsVersion: '1.2'
       scmMinTlsVersion: '1.2'
       http20Enabled: true
