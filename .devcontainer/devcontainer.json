@@ -67,6 +67,9 @@
 	"portsAttributes": {
 		"5000": {
 			"label": "HTTP"
+		},
+		"5001": {
+			"label": "HTTPS"
 		}
 	}
 }
