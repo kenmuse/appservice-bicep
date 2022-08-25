@@ -7,11 +7,8 @@ using Microsoft.Identity.Web.UI;
 
 var builder = WebApplication.CreateBuilder(args);
 
-#if !AAD_AUTH_ENABLED
-builder.Services.AddControllersWithViews();
-builder.Services.AddRazorPages();
+#if AAD_AUTH_ENABLED
 
-#else
 // Add services to the container.
 builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
     .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
@@ -25,6 +22,12 @@ builder.Services.AddControllersWithViews(options =>
 });
 builder.Services.AddRazorPages()
     .AddMicrosoftIdentityUI();
+
+#else
+
+builder.Services.AddControllersWithViews();
+builder.Services.AddRazorPages();
+
 #endif
 
 var app = builder.Build();
