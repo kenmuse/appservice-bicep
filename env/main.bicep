@@ -25,6 +25,9 @@ param location string = resourceGroup().location
 @description('Deploy to Linux or Windows')
 param isLinuxDeploy bool = false
 
+@description('Tags to be applied to the resources')
+param tagsByResource object = {}
+
 var appServicePlanName = toLower('${webAppName}-plan')
 var webSiteName = toLower('${webAppName}-web')
 var linuxSiteConfig = isLinuxDeploy ? { 
@@ -41,12 +44,14 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = {
     name: sku
   }
   kind:  isLinuxDeploy ? 'linux' : ''
+  tags: contains(tagsByResource, 'Microsoft.Web/serverfarms') ? tagsByResource['Microsoft.Web/serverfarms']: {}
 }
 
 resource appService 'Microsoft.Web/sites@2022-03-01' = {
   name: webSiteName
   location: location
   kind: 'app'
+  tags: contains(tagsByResource, 'Microsoft.Web/sites') ? tagsByResource['Microsoft.Web/sites']: {}
   identity: {
     type: 'SystemAssigned'
   }
