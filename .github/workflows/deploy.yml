@@ -1,11 +1,6 @@
 #yaml-language-server: $schema=hhttps://json.schemastore.org/github-workflow.json
 name: Deploy App
 
-env:
-  AZURE_WEBAPP_NAME: tmpdevweb
-  AZURE_RESOURCE_GROUP: tmpdevapp-rg
-  AZURE_LOCATION: eastus
-
 on:
   workflow_dispatch:
 
