@@ -6,5 +6,6 @@ This contains a simple project which deploys an App Service (on Linux or Windows
 
 This repository also demonstrates how to create a [custom GUI](./env/main-ui.json) for manual deployments. While manual deployments are not generally recommended, this one can be used to quickly spin up a Linux or Windows App Service and App Service Plan, pre-configured to support [run-from-package](https://learn.microsoft.com/en-us/azure/app-service/deploy-run-package)
 
-[![Deploy To Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#blade/Microsoft_Azure_CreateUIDef/CustomDeploymentBlade/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fkenmuse%2Fappservice-demo%2Fmain%2Fmain.json/uiFormDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Fkenmuse%2Fappservice-demo%2Fmain%2Fmain-ui.json)
+[![Deploy To Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#blade/Microsoft_Azure_CreateUIDef/CustomDeploymentBlade/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fkenmuse%2Fappservice-demo%2Fmain%2Fenv%2Fmain.json/uiFormDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Fkenmuse%2Fappservice-demo%2Fmain%2Fenv%2Fmain-ui.json)
 
+This will deploy the associated ARM template while using the custom user interface to guide the user.
