@@ -128,5 +128,7 @@ jobs:
         id: deploy-to-webapp2
         run: |
           RESULTS=$(az webapp deployment source config-zip --resource-group ${{ vars.AZURE_RESOURCE_GROUP }} --name ${{ needs.deploy-infrastructure.outputs.appServiceName }} --src ${{ runner.temp }}/package/publish.zip)
-          echo $RESULTS
-          echo "webapp-results::$RESULTS" >> $GITHUB_OUTPUT
+          echo $RESULTS | jq .
+          echo "webapp-results<<EOFDE" >> $GITHUB_OUTPUT
+          echo $RESULTS >> $GITHUB_OUTPUT
+          echo EOFDE >> $GITHUB_OUTPUT
