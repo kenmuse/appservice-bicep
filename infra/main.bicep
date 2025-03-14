@@ -44,14 +44,14 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = {
     name: sku
   }
   kind:  isLinuxDeploy ? 'linux' : ''
-  tags: contains(tagsByResource, 'Microsoft.Web/serverfarms') ? tagsByResource['Microsoft.Web/serverfarms']: {}
+  tags: tagsByResource[?'Microsoft.Web/serverfarms'] ?? {}
 }
 
 resource appService 'Microsoft.Web/sites@2022-03-01' = {
   name: webSiteName
   location: location
   kind: 'app'
-  tags: contains(tagsByResource, 'Microsoft.Web/sites') ? tagsByResource['Microsoft.Web/sites']: {}
+  tags: tagsByResource[?'Microsoft.Web/sites'] ?? {}
   identity: {
     type: 'SystemAssigned'
   }

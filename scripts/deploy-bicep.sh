@@ -53,23 +53,27 @@ main() {
   ensure_variable "${resource_group}" "Resource! group is required"
   ensure_variable "${resource_group_location}" "Resource group location is required"
   ensure_variable "${web_app_name}" "Web app name is required"
-
-  az group create --name "${resource_group}" --location "${resource_group_location}"
+  
   if [ $(az group exists --name "${resource_group}") = false ]; then
     az group create --name "${resource_group}" --location "${resource_group_location}"
   fi
 
-  RESULTS=$(az deployment group create --resource-group "${resource_group}" --query "properties.outputs" \
-            --template-file "./env/main.bicep" --parameters webAppName="${web_app_name}" \
-            isLinuxDeploy=true sku=B1)
+  RESULTS=$(az deployment group create \
+            --resource-group "${resource_group}" \
+            --query "properties.outputs" \
+            --template-file "./infra/main.bicep" \
+            --parameters webAppName="${web_app_name}" \
+            isLinuxDeploy=true \
+            sku=B1)
+
   APPSERVICENAME="$(echo $RESULTS | jq -r '.appServiceName.value' )"
   APPSERVICEHOST="$(echo $RESULTS | jq -r '.appServiceHost.value' )"
-  if [ -n "${GITHUB_OUTPUT}" ]; then
+
+  if [ -n "${GITHUB_OUTPUT:=}" ]; then
     echo "appServiceName=$APPSERVICENAME" >> $GITHUB_OUTPUT
     echo "appServiceHost=$APPSERVICEHOST" >> $GITHUB_OUTPUT
   else
-    echo "appServiceName=$APPSERVICENAME"
-    echo "appServiceHost=$APPSERVICEHOST"
+     jq -cn --arg SERVICE $APPSERVICENAME --arg HOST $APPSERVICEHOST '{appServiceName: $SERVICE, appServiceHost: $HOST}'
   fi
 }
 

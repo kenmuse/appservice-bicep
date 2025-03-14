@@ -1,10 +1,6 @@
 #yaml-language-server: $schema=hhttps://json.schemastore.org/github-workflow.json
 name: Deploy App
 
-env:
-  IS_LINUX: true
-  SKU: B1
-
 on:
   workflow_dispatch:
 
@@ -16,9 +12,9 @@ jobs:
       id-token: write
       contents: read
     outputs:
-      appServiceName: ${{ steps.deploy2.outputs.appServiceName }}
+      appServiceName: ${{ steps.deploy.outputs.appServiceName }}
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: Authenticate with Azure
       uses: azure/login@v1
@@ -27,36 +23,14 @@ jobs:
         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       
-    - name: "Create group: ${{ vars.AZURE_RESOURCE_GROUP }}"
-      if: false
-      run: |
-        if [ $(az group exists --name ${{ vars.AZURE_RESOURCE_GROUP }}) = false ]; then
-          az group create --name ${{ vars.AZURE_RESOURCE_GROUP }} --location ${{ vars.AZURE_LOCATION }}
-        fi
-    
-    # Deploy using Azure-provided Action (disabled)
-    - name: Deploy services (Action)
-      id: deploy
-      if: false
-      uses: azure/arm-deploy@v1
-      with:
-        subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-        resourceGroupName: ${{ vars.AZURE_RESOURCE_GROUP }}
-        template: ./env/main.bicep
-        parameters: 'webAppName=${{ vars.AZURE_WEBAPP_NAME }} isLinuxDeploy=${{ env.IS_LINUX }} sku=${{ env.SKU }}'
-        failOnStdErr: true
-
     # Deploy using the Azure CLI (developer-friendly)
     - name: Deploy services (AzCLI)
-      id: deploy2
-      run: |
-        RESULTS=$(az deployment group create --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" --query "properties.outputs" --template-file "./env/main.bicep" --parameters webAppName='${{ vars.AZURE_WEBAPP_NAME }}' isLinuxDeploy=false sku=B1)
-        echo $RESULTS
-        APPSERVICENAME="$(echo $RESULTS | jq -r '.appServiceName.value' )"
-        APPSERVICEHOST="$(echo $RESULTS | jq -r '.appServiceHost.value' )"
-        echo "appServiceName=$APPSERVICENAME" >> $GITHUB_OUTPUT
-        echo "appServiceHost=$APPSERVICEHOST" >> $GITHUB_OUTPUT
-
+      id: deploy
+      run: ./scripts/deploy-bicep.sh -r $RESOURCE_GROUP -l $LOCATION -n $APP_NAME
+      env:
+        RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+        LOCATION: ${{ vars.AZURE_LOCATION }}
+        APP_NAME: ${{ vars.AZURE_WEBAPP_NAME }}
 
   build:
     runs-on: ubuntu-latest
@@ -64,13 +38,15 @@ jobs:
       contents: read
       
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up .NET Core
-        uses: actions/setup-dotnet@v2
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: src/global.json
       
       - name: Set up dependency caching for faster builds
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.nuget/packages
           key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
@@ -82,7 +58,7 @@ jobs:
         working-directory: ${{ github.workspace }}/src
 
       - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: package
           path: ${{ runner.temp }}/pkg/publish.zip
@@ -102,7 +78,7 @@ jobs:
 
     steps:
       - name: Download artifact from build job
-        uses: actions/download-artifact@v4.1.7
+        uses: actions/download-artifact@v4
         with:
           name: package
           path: ${{ runner.temp }}/package
@@ -114,21 +90,11 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      # Deploy using the Azure-provided Action (disabled)
-      - name: Deploy to Azure Web App
-        if: false
-        id: deploy-to-webapp
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: ${{ needs.deploy-infrastructure.outputs.appServiceName }}
-          package: ${{ runner.temp }}/package/publish.zip
-
       # Deploy using the Azure CLI (developer-friendly)
       - name: Deploy to Azure Web App (AzCLI)
-        id: deploy-to-webapp2
-        run: |
-          RESULTS=$(az webapp deployment source config-zip --resource-group ${{ vars.AZURE_RESOURCE_GROUP }} --name ${{ needs.deploy-infrastructure.outputs.appServiceName }} --src ${{ runner.temp }}/package/publish.zip)
-          echo $RESULTS | jq .
-          echo "webapp-results<<EOFDE" >> $GITHUB_OUTPUT
-          echo $RESULTS >> $GITHUB_OUTPUT
-          echo EOFDE >> $GITHUB_OUTPUT
+        id: deploy-to-webapp
+        run: ./scripts/deploy-app.sh -r $RESOURCE_GROUP -l $PACKAGE -n $APP_SERVICE
+        env:
+          RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+          PACKAGE: ${{ runner.temp }}/package/publish.zip
+          APP_SERVICE: ${{ needs.deploy-infrastructure.outputs.appServiceName }}

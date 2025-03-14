@@ -66,7 +66,7 @@
 	// Use 'postCreateCommand' to run commands after the container is created.
 	"postAttachCommand":{
 		"setup-dotnet": "dotnet dev-certs https --trust && cd src && dotnet restore",
-		"setup-bicep": "curl -Lo /tmp/bicep https://github.com/Azure/bicep/releases/latest/download/bicep-linux-x64 && chmod +x /tmp/bicep && mv /tmp/bicep /usr/local/bin/bicep"
+		"setup-bicep": "curl -Lo /tmp/bicep https://github.com/Azure/bicep/releases/latest/download/bicep-linux-x64 && chmod +x /tmp/bicep && mv -f /tmp/bicep /usr/local/bin/bicep"
 	},
 
 	// Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
