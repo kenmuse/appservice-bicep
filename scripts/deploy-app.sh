@@ -53,9 +53,9 @@ main() {
   ensure_variable "${resource_group}" "Resource group is required"
   ensure_variable "${app_service_name}" "App service name is required"
   
-  az webapp deployment source config-zip --resource-group "${resource_group}" \
+  az webapp deploy --type zip --resource-group "${resource_group}" \
             --name "${app_service_name}" \
-            --src "${package_path}"
+            --src-path "${package_path}"
 }
 
 main "$@"
