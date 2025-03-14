@@ -26,13 +26,13 @@ ensure_variable() {
 main() {
   # Default variable values
   local resource_group=""
-  local web_app_name=""
+  local app_service_name=""
   local package_path=""
 
   while getopts ":r:l:n:" option; do
     case $option in
       n)
-        web_app_name="${OPTARG}"
+        app_service_name="${OPTARG}"
         ;;
       l)
         package_path="${OPTARG}"
