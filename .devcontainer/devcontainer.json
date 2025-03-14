@@ -7,7 +7,7 @@
 		"args": { 
 			// Update 'VARIANT' to pick a .NET Core version: 3.1, 6.0
 			// Append -bullseye or -focal to pin to an OS version.
-			"VARIANT": "6.0-bullseye",
+			"VARIANT": "6.0-jammy",
 			// Options
 			"NODE_VERSION": "none"
 		}
@@ -82,6 +82,10 @@
 	"features": {
 		"ghcr.io/devcontainers/features/powershell:1": {
 			"version": "7.4"
+		},
+		"ghcr.io/devcontainers/features/git:1": {
+			"ppa": true,
+			"version": "latest"
 		}
 	}
 }
