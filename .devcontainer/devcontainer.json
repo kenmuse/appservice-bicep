@@ -13,6 +13,11 @@
 		}
 	},
 
+	"hostRequirements": {
+		"cpus": 2,
+		"memory": "4gb"
+	},
+
 	// Configure tool-specific properties.
 	"customizations": {
 		// Configure properties specific to VS Code.
@@ -59,7 +64,10 @@
 	//      "mounts": [ "source=${env:HOME}${env:USERPROFILE}/.aspnet/https,target=/home/vscode/.aspnet/https,type=bind" ],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "dotnet dev-certs https --trust && cd src && dotnet restore",
+	"postAttachCommand":{
+		"setup-dotnet": "dotnet dev-certs https --trust && cd src && dotnet restore",
+		"setup-bicep": "curl -Lo /tmp/bicep https://github.com/Azure/bicep/releases/latest/download/bicep-linux-x64 && chmod +x /tmp/bicep && mv /tmp/bicep /usr/local/bin/bicep"
+	},
 
 	// Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
 	"remoteUser": "vscode",
@@ -69,6 +77,11 @@
 		},
 		"5001": {
 			"label": "HTTPS"
+		}
+	},
+	"features": {
+		"ghcr.io/devcontainers/features/powershell:1": {
+			"version": "7.4"
 		}
 	}
 }
