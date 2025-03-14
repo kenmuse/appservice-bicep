@@ -33,7 +33,8 @@
 				"editorconfig.editorconfig",
 				"redhat.vscode-yaml",
 				"ms-azuretools.vscode-docker",
-				"heaths.vscode-guid"
+				"heaths.vscode-guid",
+				"github.vscode-github-actions"
 			]
 		}
 	},
