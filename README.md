@@ -41,17 +41,6 @@ The workflow depends on Azure OIDC for authorizing the application and deploying
    | AZURE_TENANT_ID       | Azure AD directory (tenant)    identifier.        |
    | AZURE_SUBSCRIPTION_ID | The Azure subscription containing the resources.  |
 
-## Manual deployment with a custom UI
-
-This repository also demonstrates how to create a [custom GUI](./env/main-ui.json) for manual deployments. While manual deployments are not generally recommended, this one can be used to quickly spin up a Linux or Windows App Service and App Service Plan, pre-configured to support [run-from-package](https://learn.microsoft.com/en-us/azure/app-service/deploy-run-package)
-
-[![Deploy To Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#blade/Microsoft_Azure_CreateUIDef/CustomDeploymentBlade/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fkenmuse%2Fappservice-demo%2Fmain%2Fenv%2Fmain.json/uiFormDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Fkenmuse%2Fappservice-demo%2Fmain%2Fenv%2Fmain-ui.json)
-
-This will deploy the associated ARM template while using the custom user interface to guide the user. This UI template demonstrates how to define a complete UI. It also shows off a few techniques you can use:
-
-- Customizing the UI for ease-of-use (replacing an isLinuxDeploy boolean with a Windows/Linux options group)
-- Dynamically showing/hiding components (triggered by using a P-series SKU)
-- Dynamically querying the available regions for the App Services based on the subscription
 - Automatically defaulting the deployment location to match the selected Resource Group
 - Passing ARM functions that must be executed in the template for deployment (uniquestring) into the ARM template using a field value
 - Implementing resource tags in the UI and Bicep
